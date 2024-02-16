@@ -1,0 +1,123 @@
+---
+title: "Microclimate and its effect on vegetation in the Southern Rocky Mountains"
+output: pdf_document
+author: Adam L. Mahood
+date: "2024-02-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# summarising climate data then relating to community composition
+library(tidyverse)
+library(topomicro)
+library(vegan)
+library(terra)
+library(ggpubr)
+library(sf)
+```
+
+# Initial findings
+
+ - todo: map daily min, daily max, avg by sensor
+  - make a spatial model of daily min/max avg
+  - pair with TWI and other variables that are strong drivers
+  - get weather station data for the three VG spots
+
+
+```{r cars, include=FALSE, echo=F}
+vall_clim <- read_csv("data/cleaned_bm/vall_dec22.csv")
+
+vall_plotwise_summaries <-
+  vall_clim |>
+  plotwise_summary()
+
+vall_veg <- readr::read_csv("data/valles_caldera/microclimate - VALL_veg.csv") |>
+  dplyr::select(plot, species) |>
+  dplyr::mutate(occurrence = 1,
+                plot = str_to_lower(plot) %>% str_remove_all("_"),
+                species = str_replace_all(species, " ", "_")|>
+                  str_replace_all("-", "_")) |>
+  tidyr::pivot_wider(names_from = species, values_from = occurrence,
+                     values_fn = first, values_fill = 0) |>
+  mutate(plot = ifelse(str_sub(plot, 3,3) == "0", str_remove_all(plot, "0"), plot)) |>
+  filter(plot %in% rownames(vall_plotwise_summaries)) |>
+  arrange(plot) %>%
+  tibble::column_to_rownames("plot");vall_veg
+```
+
+## Map of sensor locations
+
+Sensors were placed in a transect from Redondo Saddle, through the small hill near the visitor center, and to the other side of the Valley. Additional sensors were placed on the valley bottom where we anticipated cold air to pool in the morning.
+
+```{r map, echo=FALSE, message=F, warning=F}
+slope <- terra::rast("data/valles_caldera/valle_grande_dem.tif") |>
+  terra::terrain('slope', unit = "radians")
+aspect <- terra::rast("data/valles_caldera/valle_grande_dem.tif") |>
+  terra::terrain('aspect', unit = "radians")
+sensors <- read_csv("data/sensor_locations.csv") |>
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) |>
+  dplyr::filter(str_sub(id,1,1) %in% c("v", "r"))|>
+  st_transform(crs = st_crs(slope))
+terra::shade(slope, aspect) |>
+  as.data.frame(xy=TRUE) |>
+  ggplot() +
+  geom_raster(aes(x=x,y=y,fill=hillshade),legend=F) +
+  theme_void() +
+  geom_sf_text(data = sensors, aes(label = id)) +
+  ggtitle("Sensor Locations")
+
+
+```
+
+## sensor time series measurements
+
+Each sensor was visited in December 2022 to retrieve data, and again in August 2023 to remove. 
+
+```{r ts, echo=FALSE, fig.height=10}
+vall_clim |>
+  ggplot() +
+  geom_line(aes(x=dt, y=temperature_c)) +
+  facet_wrap(~id, ncol=1)
+```
+
+## Plot of Minimum vpd vs Diurnal Temperature Range
+
+```{r vpd, echo=FALSE, message=F, warning=F}
+vall_plotwise_summaries |>
+  ggplot(aes(x=vmin, y=tdelta)) +
+  xlab("Minimum VPD") +
+  ylab("Diurnal Temperature Range") +
+  geom_point(size=3)
+```
+
+
+## Non-metric multidimensional scaling plots
+
+These plots illustrate how community composition is associated with diurnal temperature range and minimum VPD
+
+```{r nmds, echo=FALSE, message=F, warning=F}
+
+vegan::metaMDS(vall_veg, trace=F) -> nmdsv
+
+sitesv <- nmdsv$points |>
+  as.data.frame() |>
+  tibble::rownames_to_column("plot") |>
+  left_join(vall_plotwise_summaries |> tibble::rownames_to_column("plot"))
+
+ptd <- sitesv |>
+  ggplot() +
+  geom_text(aes(x=MDS1, y=MDS2,label = plot, color = tdelta), fontface='bold') +
+  scale_color_viridis_c(name = "Diurnal\nTemperature\nRange") +
+  coord_equal() +
+  theme_light(); ptd
+
+pvm <- sitesv |>
+  dplyr::rename(`Minimum VPD` = vmin) |>
+  ggplot() +
+  geom_text(aes(x=MDS1, y=MDS2,label = plot, color = `Minimum VPD`), fontface='bold') +
+  scale_color_viridis_c() +
+  coord_equal() +
+  theme_light(); pvm
+```
+
