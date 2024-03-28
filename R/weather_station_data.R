@@ -1,8 +1,7 @@
 library(tidyverse)
 library(janitor)
 
-files <- list.files("data/big/weather_stations", full.names = T)
-
+# functions ============================================================
 clean_wrcc <- function(filename){
   print(filename)
   d <- readxl::read_xlsx(filename, skip = 3) |>
@@ -33,7 +32,37 @@ clean_wrcc <- function(filename){
   return(d)
 }
 
-cleand_wrx <- lapply(files, clean_wrcc)
+clean_mef <- function(filename){
+  print(filename)
+  d <- readxl::read_xlsx(filename, skip = 3) |>
+    janitor::clean_names()
+  hv <- readxl::read_xlsx(filename) |>
+    janitor::clean_names()
+  h <- hv[1:3,]
+  old_names <- names(hv)
+  new_names <- c()
+  for(i in 1:ncol(h)){
+    new_names[i] <- h |>
+      pull(old_names[i]) |>
+      paste(collapse = "_") |>
+      str_remove_all("\\:")  |>
+      str_remove_all(" ") |>
+      str_remove_all("\\/") |>
+      str_remove_all("NA")|>
+      str_remove_all("^_") |>
+      str_remove_all("_$") |>
+      str_to_lower()
+  }
+  names(d) <- new_names
+  d <- janitor::clean_names(d)
+  d$filename <- filename
+  return(d)
+}
+
+# cleaning =========
+val_files <- list.files("data/big/weather_stations", full.names = T)
+
+cleand_wrx <- lapply(val_files, clean_wrcc)
 
 all <- bind_rows(cleand_wrx) |>
   dplyr::select(ppt_in = in_precip,
@@ -44,3 +73,9 @@ all <- bind_rows(cleand_wrx) |>
                 date_mmddyyyy, dt, year)
 write_csv(all,"data/vall_stations_cleaned.csv")
 
+# mef ================
+
+mef_files <- "data/Julian Date 177 1000 to 03_12_24 post pub backup.xlsx"
+
+cleaned_mef <- clean_mef(mef_files)
+write_csv(cleaned_mef, "data/mef_station_cleaned.csv")
