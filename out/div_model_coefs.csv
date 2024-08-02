@@ -1,0 +1,5 @@
+effect,component,group,term,estimate,std.error,conf.low,conf.high
+fixed,cond,NA,(Intercept),2.899,0.059,2.775,3.013
+fixed,cond,NA,dtr_thresholdCADRecipient,-0.223,0.105,-0.429,-0.02
+fixed,cond,NA,siteval,0.231,0.081,0.073,0.396
+fixed,cond,NA,dtr_thresholdCADRecipient:siteval,0.101,0.145,-0.182,0.393

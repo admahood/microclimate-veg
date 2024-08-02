@@ -78,7 +78,7 @@ if(!file.exists(hmsc_file)){
   save(m, file=hmsc_file)
 }else{load(hmsc_file)}
 
-
-gghmsc::ggplot_convergence(m)
-gghmsc::ggplot_beta(m)
-
+library(tidyverse)
+gghmsc::gghmsc_convergence(m)
+gghmsc::gghmsc_beta(m)
+gghmsc::gghmsc_omega(m)

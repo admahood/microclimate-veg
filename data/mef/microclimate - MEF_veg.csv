@@ -21,7 +21,7 @@ MEF_17,EB3DB7AD,39.09943,-105.05992,Ribes sp,Ribes cereum,,,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Fragaria vesca,Fragaria vesca,,,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Carex sp,Carex sp1,,,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Senecio pudicus,Senecio pudicus,,,MG
-MEF_17,EB3DB7AD,39.09943,-105.05992,Erigeron sp. vetensis,Erigeron vetensis,"basal, entire linear to spatulate",,MG
+MEF_17,EB3DB7AD,39.09943,-105.05992,Erigeron sp vetensis,Erigeron vetensis,"basal, entire linear to spatulate",,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Achillea millefolium,Achillea millefolium,,,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Pseudotuga menzezii,Pseudotsuga menziesii,,,MG
 MEF_17,EB3DB7AD,39.09943,-105.05992,Pinus flexulus,Pinus flexilis,,,MG
@@ -40,7 +40,7 @@ MEF_14,C907CBBE,39.098716,-105.059242,Jamesia americana,Jamesia americana,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Elymus elymoides,Elymus elymoides,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Pinus ponderosa,Pinus ponderosa,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Solidago missouriensis,Solidago missouriensis,,,MG
-MEF_14,C907CBBE,39.098716,-105.059242,Ribes sp. cfaurenm,Ribes cereum,,,MG
+MEF_14,C907CBBE,39.098716,-105.059242,Ribes sp cfaurenm,Ribes cereum,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Rubus deliciousus,Rubus deliciosus,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Senecio pudicus,Senecio pudicus,,,MG
 MEF_14,C907CBBE,39.098716,-105.059242,Holodiscus discolor,Holodiscus discolor,,,MG
@@ -64,7 +64,7 @@ MEF_15,EC8707C6,39.09836,-105.06024,Carex sp1,Carex sp1,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Geranium caespitosum,Geranium caespitosum,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Jamesia americana,Jamesia americana,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Arctostaphylus uvaerse,Arctostaphylos uva-ursi,,,MG
-MEF_15,EC8707C6,39.09836,-105.06024,Frageria vesca,Fragaria vesca,,,MG
+MEF_15,EC8707C6,39.09836,-105.06024,Fragaria vesca,Fragaria vesca,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Penstemon sp1,Penstemon sp1,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Juniperus comunus,Juniperus communis,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Heterotheca foliosa,Heterotheca foliosa,,,MG
@@ -122,7 +122,7 @@ MEF_15,EC8707C6,39.09836,-105.06024,Carex sp1,Carex sp1,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Geranium caespitosum,Geranium caespitosum,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Jamesia americana,Jamesia americana,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Arctostaphyllus uvaurse,Arctostaphylos uva-ursi,,,MG
-MEF_15,EC8707C6,39.09836,-105.06024,Frageria vesca,Frageria vesca,,,MG
+MEF_15,EC8707C6,39.09836,-105.06024,Fragaria vesca,Fragaria vesca,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Penstemon sp1,Penstemon sp1,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Juniperus comunus,Juniperus communis,,,MG
 MEF_15,EC8707C6,39.09836,-105.06024,Heterotheca foliosa,Heterotheca foliosa,,,MG
@@ -378,7 +378,7 @@ MEF_7,-,-,-,Maianthemum stellatum,Maianthemum stellatum,,,MG
 MEF_7,-,-,-,Achillea millifolia,Achillea millefolium,,,MG
 MEF_7,-,-,-,Salix-looking thing,Salix sp,,,MG
 MEF_7,-,-,-,Acer glabrum,Acer glabrum,,,MG
-MEF_7,-,-,-,Stellaria,Stellaria sp.,,,MG
+MEF_7,-,-,-,Stellaria,Stellaria sp,,,MG
 MEF_7,-,-,-,Lomatium,Lomatium linearifolium,from MEF_5,,MG
 MEF_7,-,-,-,Juniperus horizontalis,Juniperus horizontalis,,,MG
 MEF_2,-,-,-,Rosa woodsii,Rosa woodsii,,same as Rosa sp?,MG
