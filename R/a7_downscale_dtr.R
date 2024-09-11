@@ -1,6 +1,8 @@
 # downscale dtr
 source('R/a1_data_prep.R')
 library(fields)
+library(cowplot)
+library(ggthemes)
 library(ggpubr)
 library(geomtextpath)
 mef_dem <- terra::rast('data/mef_dem.tif')
@@ -25,7 +27,8 @@ dm <- mef_plotwise_summaries |>
 
 dmsf <- locations |>
   filter(id %in% dm$id) |>
-  left_join(dm)
+  left_join(dm)|>
+  mutate(rel_elv = elevation - min(elevation))
 
 dv <- vall_plotwise_summaries |>
   tibble::rownames_to_column('id') |>
@@ -34,7 +37,8 @@ dv <- vall_plotwise_summaries |>
 dvsf <- locations |>
   mutate(id = str_replace_all(id, "vg0", 'vg')) |>
   filter(id %in% dv$id) |>
-  left_join(dv)
+  left_join(dv) |>
+  mutate(rel_elv = elevation - min(elevation))
 
 mm <- lm(tdelta ~ twi + elevation, data = dmsf)
 performance::check_model(mm); summary(mm)
@@ -90,7 +94,7 @@ predict_sp(c(val_twi, val_dem), vsp) |> plot()
 
 bsp <- tidy_sp(dvsf |> bind_rows(dmsf), vars = c("twi", 'elevation'), y = 'tdelta')
 predict_sp(c(val_twi, val_dem), bsp) |> plot()
-
+dtr_spmod <- bsp; save(dtr_spmod, file = 'out/dtr_spmod.rda')
 preds <- predict_sp(c(val_twi, val_dem), bsp)
 
 pv <- preds |> as.data.frame(xy=TRUE) |>
@@ -98,11 +102,14 @@ pv <- preds |> as.data.frame(xy=TRUE) |>
   geom_raster(aes(x=x,y=y, fill = prediction)) +
   geom_sf(data = dvsf) +
   scale_fill_gradient2(midpoint = 14, name = "Predicted\nDTR") +
-  theme_void() +
+  ggthemes::theme_clean() +
+  annotate(geom = "text", x= -106.55, y=35.9, label = "a. Valles Caldera", fontface='bold', size=8) +
+  coord_sf(expand=F) +
+  # ggtitle("Valles Caldera") +
   theme(legend.position=c(0.05,0.05),
         legend.justification = c(0,0),
-        legend.background = element_rect(color = "black", fill="white")) +
-  ggtitle("Valles Caldera")
+        axis.title = element_blank(),
+        legend.background = element_rect(color = "black", fill="white"));pv
 
 mpreds <- predict_sp(c(mef_twi, mef_dem), bsp)
 
@@ -111,33 +118,45 @@ pm <- mpreds |> as.data.frame(xy=TRUE) |>
   geom_raster(aes(x=x,y=y, fill = prediction)) +
   geom_sf(data = dmsf) +
   scale_fill_gradient2(midpoint = 15, name = "Predicted\nDTR") +
-  theme_void() +
+  ggthemes::theme_clean() +
+  coord_sf(expand = F) +
+  annotate(geom = 'text', x=-105.11, y=39.12, label = "b. Manitou", fontface = 'bold', size = 8) +
   theme(legend.position=c(0.05,0.05),
         legend.justification = c(0,0),
-        legend.background = element_rect(color = "black", fill="white")) +
-  ggtitle("Manitou EF");pm
+        axis.title = element_blank(),
+        legend.background = element_rect(color = "black", fill="white"));pm
 
 ggarrange(pv, pm, nrow =2, ncol=1, heights = c(1.3,1)) |>
   ggsave(filename = "out/twi_predictions.png", bg='white',
          width =5, height =7)
 
 
-dmsf %>%
+pr2 <- dmsf %>%
   mutate(terra::extract(mpreds,.),
          site = "Manitou EF") |>
   bind_rows(dvsf %>%
               mutate(terra::extract(preds,.),
-                     site = "Valles Caldera") ) |>
+                     site = "Valles\nCaldera") ) |>
   ggplot(aes(x=prediction, y=tdelta)) +
   geom_point(aes(color = site)) +
   # geom_smooth(method = 'lm') +
   geom_textabline(label="1:1 line") +
   scale_color_brewer(palette = "Set1") +
-  theme_classic() +
-  theme(legend.position = c(0,1),
-        legend.justification = c(0,1),
+  xlab("Predicted DTR") +
+  ylab("Observed DTR") +
+  ggtitle("c. Model Fit") +
+  theme_clean() +
+  theme(#legend.position = 'bottom', #c(0,1),
+        #legend.justification = c(0,1),
+        legend.title = element_blank(),
         legend.background = element_rect(fill=NA))
 ggsave("out/tdelta_preds.png", bg='white', width=3.5, height=3.5)
+
+fig_preds <- cowplot::ggdraw(ylim = c(0,1.2)) +
+  draw_plot(pv, x=0, y=.5,width = 1, height=.7) +
+  draw_plot(pm, x=0, y=0,width = 1, height=.5) +
+  draw_plot(pr2, x=0.54, y=.94,width = .45, height=.25)
+ggsave(plot = fig_preds, filename = 'out/fig4_multipanel.png', width = 9, height =12, bg='white')
 
 terra::writeRaster(mpreds, filename = "data/mef_dtr.tif")
 terra::writeRaster(preds, filename = "data/val_dtr.tif")

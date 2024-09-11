@@ -1,48 +1,47 @@
 var,source,r2_vall,r2_mef,r2_both
-tdelta,micro,0.59 **,0.59 ***,0.01 
-vmin,micro,0.37 *,0.62 ***,0.35 ***
-vdelta,micro,0.28 .,0.32 *,0.15 *
-tmin,micro,0.26 .,0.09 ,0.18 *
-vmax,micro,0.21 ,0.16 ,0.21 **
-tmax,micro,0.18 ,0.19 ,0.11 .
-tmean,micro,0.13 ,0.02 ,0.14 *
-vmean,micro,0.01 ,0.15 ,0.37 ***
-p_ATR,prism,0.62 ***,0.1 ,0.15 *
-p_vmax,prism,0.61 ***,0.19 ,0.17 *
-p_vmin,prism,0.56 **,0.06 ,0.22 **
-p_tmax,prism,0.54 **,0.21 .,0.14 *
-p_tmin,prism,0.52 **,0.35 *,0.08 
-p_ppt,prism,0.51 **,0.17 ,0.16 *
-prediction,prism,0.44 **,0.42 **,0.02 
-p_tmean,prism,0.24 .,0.31 *,0.09 
-tc_ATR,topoclim,0.73 ***,0.15 ,0.24 **
-tc_aet,topoclim,0.52 **,0.17 ,0.75 ***
-tc_tmx,topoclim,0.43 **,0.2 ,0.09 
-tc_def,topoclim,0.16 ,0.23 .,0.17 *
-tc_tmin,topoclim,0.12 ,0.13 ,0.27 **
-elevation,topography,0.45 **,0.31 *,0.06 
-elv_rel,topography,0.45 **,0.31 *,0.14 *
-twi,topography,0.38 *,0.56 ***,0.32 ***
-fa_x_slope,topography,0.1 ,0.18 ,0.02 
-hli,topography,0.04 ,0.02 ,0.14 *
-aspect,topography,0.02 ,0.15 ,0.04 
-fa,topography,0.02 ,0.12 ,0.05 
-wc2.1_30s_bio_4,worlclim,0.63 ***,0.24 .,0.43 ***
-wc2.1_30s_bio_7,worlclim,0.61 ***,0.21 .,0.28 **
-wc2.1_30s_bio_2,worlclim,0.59 ***,0.22 .,0.3 ***
-wc2.1_30s_bio_3,worlclim,0.59 ***,0.27 *,0.28 **
-wc2.1_30s_bio_15,worlclim,0.57 **,0.27 *,0.68 ***
-wc2.1_30s_bio_5,worlclim,0.57 **,0.19 ,0.16 *
-wc2.1_30s_bio_10,worlclim,0.56 **,0.19 ,0.15 *
-wc2.1_30s_bio_18,worlclim,0.56 **,0.14 ,0.57 ***
-wc2.1_30s_bio_13,worlclim,0.55 **,0.11 ,0.64 ***
-wc2.1_30s_bio_19,worlclim,0.55 **,0.21 .,0.65 ***
-wc2.1_30s_bio_8,worlclim,0.55 **,0.19 ,0.16 *
-wc2.1_30s_bio_9,worlclim,0.55 **,0.16 ,0.78 ***
-wc2.1_30s_bio_12,worlclim,0.54 **,0.31 *,0.62 ***
-wc2.1_30s_bio_16,worlclim,0.54 **,0.14 ,0.62 ***
-wc2.1_30s_bio_1,worlclim,0.52 **,0.18 ,0.33 ***
-wc2.1_30s_bio_17,worlclim,0.51 **,0.21 .,0.68 ***
-wc2.1_30s_bio_14,worlclim,0.42 **,0.15 ,0.7 ***
-wc2.1_30s_bio_6,worlclim,0.34 *,0.06 ,0.72 ***
-wc2.1_30s_bio_11,worlclim,0.3 *,0.16 ,0.54 ***
+tdelta,micro,0.59 **,0.69 ***,0.11 .
+vmin,micro,0.37 *,0.63 ***,0.37 ***
+vdelta,micro,0.28 *,0.39 **,0.36 ***
+tmin,micro,0.26 .,0.08 ,0.18 *
+vmax,micro,0.21 ,0.23 .,0.37 ***
+tmax,micro,0.18 ,0.25 .,0.27 **
+tmean,micro,0.13 ,0.04 ,0.24 **
+vmean,micro,0.01 ,0.16 ,0.39 ***
+p_ATR,prism,0.62 ***,0.15 ,0.05 
+p_vmax,prism,0.61 ***,0.25 *,0.16 *
+p_vmin,prism,0.56 **,0.1 ,0.11 .
+p_tmax,prism,0.54 **,0.27 *,0.05 
+p_tmin,prism,0.52 **,0.36 **,0.03 
+p_ppt,prism,0.51 **,0.2 .,0.1 
+prediction,prism,0.44 **,0.51 **,0.04 
+p_tmean,prism,0.24 .,0.38 **,0.03 
+tc_ATR,topoclim,0.73 ***,0.21 .,0.3 **
+tc_aet,topoclim,0.52 **,0.18 ,0.77 ***
+tc_tmx,topoclim,0.43 **,0.28 *,0.08 
+tc_def,topoclim,0.16 ,0.32 *,0.25 **
+tc_tmin,topoclim,0.12 ,0.16 ,0.35 ***
+elevation,topography,0.45 **,0.4 **,0.07 
+twi,topography,0.38 *,0.57 ***,0.32 ***
+fa_x_slope,topography,0.1 ,0.16 ,0.03 
+hli,topography,0.04 ,0.03 ,0.1 
+aspect,topography,0.02 ,0.17 ,0.02 
+fa,topography,0.02 ,0.13 ,0.01 
+wc2.1_30s_bio_4,worlclim,0.63 ***,0.26 *,0.43 ***
+wc2.1_30s_bio_7,worlclim,0.61 ***,0.24 .,0.26 **
+wc2.1_30s_bio_2,worlclim,0.59 ***,0.25 *,0.31 ***
+wc2.1_30s_bio_3,worlclim,0.59 **,0.3 *,0.3 **
+wc2.1_30s_bio_15,worlclim,0.57 **,0.29 *,0.72 ***
+wc2.1_30s_bio_5,worlclim,0.57 **,0.22 .,0.09 
+wc2.1_30s_bio_10,worlclim,0.56 **,0.22 .,0.08 
+wc2.1_30s_bio_18,worlclim,0.56 **,0.16 ,0.6 ***
+wc2.1_30s_bio_13,worlclim,0.55 **,0.13 ,0.68 ***
+wc2.1_30s_bio_19,worlclim,0.55 **,0.23 .,0.68 ***
+wc2.1_30s_bio_8,worlclim,0.55 **,0.22 .,0.11 .
+wc2.1_30s_bio_9,worlclim,0.55 **,0.18 ,0.81 ***
+wc2.1_30s_bio_12,worlclim,0.54 **,0.32 *,0.65 ***
+wc2.1_30s_bio_16,worlclim,0.54 **,0.16 ,0.66 ***
+wc2.1_30s_bio_1,worlclim,0.52 **,0.21 .,0.22 **
+wc2.1_30s_bio_17,worlclim,0.51 **,0.23 .,0.72 ***
+wc2.1_30s_bio_14,worlclim,0.42 **,0.18 ,0.74 ***
+wc2.1_30s_bio_6,worlclim,0.34 *,0.05 ,0.7 ***
+wc2.1_30s_bio_11,worlclim,0.3 *,0.18 ,0.45 ***
