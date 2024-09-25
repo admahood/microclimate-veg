@@ -1,5 +1,5 @@
 library(tidyverse)
-devtools::install_github('admahood/topomicro', force =TRUE)
+# devtools::install_github('admahood/topomicro', force =TRUE)
 library(topomicro)
 library(Hmsc)
 require(snow)
@@ -119,7 +119,7 @@ ggplot(prevalencev) +
 ggplot(prevalencem) +
   geom_histogram(aes(x=prevalence))
 
-xformula <- ~ tdelta + vmin
+xformula <- ~ tdelta
 
 vXSel <- list()
 vXSel$covGroup <- c(1:8)
@@ -137,6 +137,8 @@ modm = Hmsc(Y = mef_veg, XFormula = xformula, XData = tc_mef) # maybe do a spati
 nChains = 4
 test.run = FALSE
 
+
+
 if (test.run){
   thin = 10
   samples = 100
@@ -145,7 +147,7 @@ if (test.run){
 
 }else{
   thin = 100
-  samples = 700
+  samples = 800
   transient = ceiling(thin*samples*.5)
   hmsc_file <- str_c("data/hmsc/hmsc_probit_",
                      str_replace_all((thin*samples) + transient, "000$", "K"),
