@@ -173,25 +173,27 @@ if(!file.exists(hmsc_file)){
   save(mm, mv, file=hmsc_file)
 }else{load(hmsc_file)}
 
-gghmsc::gghmsc_convergence(mm, title = "Model Convergence: Manitou") -> pcm
-gghmsc::gghmsc_convergence(mv, title = "Model Convergence: Valles Caldera") -> pcv
+load("data/hmsc/hmsc_probit_120K_iters.Rda")
+
+gghmsc::gghm_convergence(mm, title = "Model Convergence: Manitou") -> pcm
+gghmsc::gghm_convergence(mv, title = "Model Convergence: Valles Caldera") -> pcv
 ggpubr::ggarrange(pcm, pcv, nrow = 2) |> ggsave(filename = "out/jsdm_convergence.png", height = 6, width = 6, bg='white')
 
 
-gghmsc::gghmsc_fit(mm, which = 'named', title = "Variance Explained: Manitou") -> prm
+gghmsc::gghm_fit(mm, which = 'named', title = "Variance Explained by DTR: Manitou") -> prm
 ggsave(plot = prm, filename ="out/jsdm_r2_mef.png", width = 8, height = 15, bg = 'white')
 
-gghmsc::gghmsc_fit(mv, which = 'named', title = 'Variance Explained: Valles Caldera') -> prv
+gghmsc::gghm_fit(mv, which = 'named', title = 'Variance Explained by DTR: Valles Caldera') -> prv
 ggsave(plot = prv, filename ="out/jsdm_r2_val.png", width = 8, height = 15, bg = 'white')
 
-gghmsc::gghmsc_beta(mm, title = "Manitou Experimental Forest") -> pbm
-gghmsc::gghmsc_beta(mv, title = "Valles Caldera National Preserve") -> pbv
+gghmsc::gghm_beta(mm, title = "Manitou Experimental Forest") -> pbm
+gghmsc::gghm_beta(mv, title = "Valles Caldera National Preserve") -> pbv
 
 ggpubr::ggarrange(pbm, pbv, nrow =1) |> ggsave(filename = 'out/jsdm_betas.png', width = 10, height = 15, bg = "white")
 
+# gghmsc::gghm_beta2(mm)
 
-
-gghmsc::gghmsc_vp(mm)
+gghmsc::gghm_vp(mm)
 # gghmsc::gghmsc_omega(mm)
 
 gghmsc::gghmsc_convergence(mv, title = "Model Convergence: Valles Caldera") -> pcv
