@@ -51,3 +51,4 @@ rsconnect/
 # big files folder
 data/big/
 data/prism/
+data/archive/*

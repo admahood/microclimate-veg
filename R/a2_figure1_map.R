@@ -6,6 +6,8 @@ library(topomicro)
 library(ggnewscale)
 library(ggpubr)
 library(ggthemes)
+library(geomtext)
+library(ggspatial)
 
 # make a 4 panel map: 1. TWI, 2. DEM/hillshade, 3. Worldclim DTR, 4. Modelled DTR
 # make sure we're using USGS 3dep 10meter DEM, correct TWI
@@ -15,15 +17,15 @@ prism <- terra::rast("data/prism/PRISM_tmin_30yr_normal_800mM5_annual_bil.bil")
 dems <- terra::rast('data/mef_dem.tif') |>
   list(terra::rast('data/vc_dem.tif'))
 
-vall_stations <- data.frame(name = c("Redondo Saddle", "Valle Grande", "Hidden Valley"),
+vall_stations <- data.frame(name = c("Redondo\nSaddle\nWx", "Valle Grande Wx", "Hidden Valley Wx"),
                             x = c(-106.55361111111111, -106.521, -106.50055555555555),
                             y = c(35.88388888888889, 35.858333333333334,35.840833333333336)) |>
   st_as_sf(coords = c(x='x',y='y'), crs = 4326) |>
   st_transform(crs = st_crs(dems[[2]]))
 
-mef_station <- data.frame(name = "Wx",
-                          y= 39.100509242733764,
-                          x=-105.09422836459245)|>
+mef_station <- data.frame(name = c("Wx", "Mt. Deception", "Hotel Gulch"),
+                          y= c(39.100509242733764,39.100509242733764, 39.09),
+                          x=-c(105.09422836459245, 105.05999, 105.05999))|>
   st_as_sf(coords = c(x='x',y='y'), crs = 4326)
 
 locations <- read_csv("data/sensor_locations.csv")
@@ -73,10 +75,15 @@ pm <- ggplot() +
   geom_raster(data = mef_hill, aes(x=x, y=y, fill = hillshade), alpha = 0.5, show.legend =F) +
   scale_fill_gradient(low = 'black', high = "grey") +
   geom_tile(data = prism_ll, aes(x=x,y=y), color = "black", fill = "transparent") +
-  geom_sf(data = filter(locations_sf, str_sub(id, 1,3)=="mef")) +
-  geom_sf_text(data = mef_station, aes(label = name )) +
+  geom_sf(data = filter(locations_sf, str_sub(id, 1,3)=="mef"),
+          color = 'black', stroke =1,
+          shape = 1) +
+  geom_sf_text(data = mef_station, aes(label = name ), nudge_y = .001) +
+  geom_sf(data = mef_station[1,], shape=15) +
   geom_sf_text(data = locations_sf |>
                  filter(id %in% c("mef25", 'mef9')), aes(label = id),nudge_x = .003) +
+  ggspatial::annotation_scale(pad_x = unit(14.5, 'cm'),
+                              pad_y = unit(10, 'cm')) +
   coord_sf(xlim = c(-105.105, -105.015),
            ylim = c(39.07, 39.11),
            expand = F) +
@@ -109,23 +116,26 @@ pv <- ggplot() +
   geom_raster(data = val_hill, aes(x=x, y=y, fill = hillshade), alpha = 0.5, show.legend =F) +
   scale_fill_gradient(low = 'black', high = "grey") +
   geom_tile(data = prism_vall, aes(x=x,y=y), color = "black", fill = "transparent") +
-  geom_sf(data = locations_val) +
-  geom_sf_text(data = vall_stations, aes(label = name)) +
+  geom_sf(data = locations_val, shape =1, stroke = 1) +
+  geom_sf_text(data = vall_stations, aes(label = name), nudge_y = 0.0017) +
+  geom_sf(data= vall_stations, shape = 15) +
   geom_sf_text(data = locations_val |>
                  filter(id %in% c("vg14", 'vg15')), aes(label = id), nudge_x = 0.003) +
   coord_sf(xlim = c(-106.565, -106.45),
            ylim = c(35.83, 35.89),
            expand = F)+
   ggtitle("b. Valles Caldera National Preserve") +
+  ggspatial::annotation_scale(pad_x = unit(3.5, 'cm'),
+                              pad_y = unit(1, 'cm')) +
   theme_clean() +
   theme(axis.title = element_blank(),
-        legend.position = c(0,0), legend.justification = c(0,0));pv
+        legend.position = c(0,0), legend.justification = c(0,0))#;pv
 
-ggarrange(pm, pv, ncol=1) |>
-  ggsave(filename = 'out/figure_1_map_v.png', width = 6.5, height = 8.5, bg="white")
-
-ggarrange(pm, pv, ncol=2, widths = c(1.07, 1)) |>
-  ggsave(filename = 'out/figure_1_map_h.png', width = 13.5, height = 4.5, bg="white")
+# ggarrange(pm, pv, ncol=1) |>
+#   ggsave(filename = 'out/figure_1_map_v.png', width = 6.5, height = 8.5, bg="white")
+#
+# ggarrange(pm, pv, ncol=2, widths = c(1.07, 1)) |>
+#   ggsave(filename = 'out/figure_1_map_h.png', width = 13.5, height = 4.5, bg="white")
 
 inset_val <- read_csv("data/cleaned_bm/vall_dec22.csv") |>
   filter(id %in% c('vg14', 'vg15'),

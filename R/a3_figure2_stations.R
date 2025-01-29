@@ -55,7 +55,8 @@ p_dtr <- ggplot(daily_dtr |> filter(vmin > 0) |> mutate(Month = lubridate::month
   ylab("Diurnal Temperature Range (Degrees Celsius)") +
   # scico::scale_fill_scico_d(palette = 'cork')+
   theme_clean() +
-  theme(axis.title.x = element_blank());p_dtr
+  theme(axis.title.x = element_blank(),
+        legend.background = element_rect(color =  'transparent'));p_dtr
 
 # ggarrange(p1, p2, nrow =2) |>
 #   ggsave(filename = 'out/vpdmin_dtr_vall_sensors.png', bg='white', height =9, width=9)
@@ -160,9 +161,9 @@ pt <- resdf_t |>
   #       legend.justification = c(0,0))
 
 
-ggarrange(p2, p3, pt, ncol =1, heights = c(1,1,1))
-
-ggsave(filename = 'out/mean_stability.png', width = 7, height=7, bg='white')
+# ggarrange(p2, p3, pt, ncol =1, heights = c(1,1,1))
+#
+# ggsave(filename = 'out/mean_stability.png', width = 7, height=7, bg='white')
 
 
 

@@ -38,12 +38,28 @@ val_std <- read_csv("data/vall_stations_cleaned.csv") |>
 # hours between 24-32C - calculate that
 mef_plotwise_summaries <-
   mef_clim |>
-  plotwise_summary_std(stdf = mef_station_data)
+  plotwise_summary_std(stdf = mef_station_data); dim(mef_plotwise_summaries)
 
 vall_plotwise_summaries <-
   vall_clim |>
   plotwise_summary_std(stdf = val_std)
 
+vmps <- mef_plotwise_summaries |>
+  as_tibble(rownames = 'plot') |>
+  dplyr::select(1:9) |>
+  mutate(basin = "mef") |>
+  bind_rows(vall_plotwise_summaries |>
+              as_tibble(rownames = 'plot') |>
+              dplyr::select(1:9) |>
+              mutate(basin = 'vc'))
+
+ggplot(vmps) +
+  geom_density(aes(x=tdelta, fill = basin), alpha =0.5)
+vmps |>
+  group_by(basin) |>
+  summarise(mean = mean(tdelta),
+            max = max(tdelta),
+            min = min(tdelta))
 
 
 
@@ -237,7 +253,7 @@ env_a <-as.data.frame(env$vectors$arrows*sqrt(env$vectors$r)) %>%
 
 env_b <-as.data.frame(envm$vectors$arrows*sqrt(envm$vectors$r)) %>%
   tibble::rownames_to_column("species")  %>%
-  mutate(p =envm$vectors$pvals, site = "Manitou EF") %>%
+  mutate(p =envm$vectors$pvals, site = "Manitou") %>%
   filter(p <= 0.001) |>
   bind_rows(env_a) |>
   # filter(str_sub(species,1,1) != "r", str_sub(species,1,1) != "s")
@@ -246,7 +262,7 @@ env_b <-as.data.frame(envm$vectors$arrows*sqrt(envm$vectors$r)) %>%
 ptd <- sitesv |>
   mutate(site = "Valles Caldera",
          `Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 14, "CAD Recipient", "CAD Donor")) |>
-  bind_rows(sites |> mutate(site = "Manitou EF") |>
+  bind_rows(sites |> mutate(site = "Manitou") |>
               mutate(`Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 15, "CAD Recipient", "CAD Donor"))) |>
   ggplot() +
   geom_segment(data = env_b,x=0,y=0, color = "grey",arrow = arrow(),
@@ -367,7 +383,7 @@ ef_df |>
                    r2_vall = str_c(r2_vall, ' ', star_vall),
                    r2_mef = str_c(r2_mef, ' ', star_mef),
                    r2_both = str_c(r2_both, ' ', star_both)) |> print(n=99)
-  write_csv("out/initial_ndms.csv")
+  # write_csv("out/initial_ndms.csv")
 
 # plot with all three ==========================================================
 
@@ -380,11 +396,26 @@ env_bbb <- bind_rows(env_b, envb_b) |>
       species == 'twi' ~ "TWI",
       species == 'tc_aet' ~ "AET",
       species == 'tc_def' ~ "CWD",
-
     ))
 
+env_labels <- env_bbb |>
+  mutate(NMDS1 = ifelse(species == "VPDmin" & site == "Both", -1.1, NMDS1),
+         NMDS1 = ifelse(species == "TWI" & site == "Both", .9, NMDS1),
+         NMDS1 = ifelse(species == "TWI" & site == "Manitou", -1, NMDS1),
+         NMDS1 = ifelse(species == "VPDmin" & site == "Manitou", 1, NMDS1),
+         NMDS2 = ifelse(species == "VPDmin" & site == "Manitou", -.5, NMDS2),
+         NMDS2 = ifelse(species == "AET" & site == "Both", 1, NMDS2),
+         NMDS1 = ifelse(species == "AET" & site == "Both", .5, NMDS1),
+         NMDS2 = ifelse(species == "CWD" & site == "Both", -.9, NMDS2),
+         NMDS2 = ifelse(species == "DTR" & site == "Manitou", 1, NMDS2),
+         NMDS2 = ifelse(species == "VPDmin" & site == "Valles Caldera", 1, NMDS2),
+         NMDS2 = ifelse(species == "DTR" & site == "Valles Caldera", -1, NMDS2),
+         NMDS2 = ifelse(species == "TWI" & site == "Valles Caldera", -.7, NMDS2),
+         NMDS1 = ifelse(species == "TWI" & site == "Valles Caldera", -.6, NMDS1),
+         NMDS2 = ifelse(species == "VPDmin" & site == "Both", .4, NMDS2))
+
 spp_v <- tidy_envfit(envss) |> filter(p < 0.05 & r2 > 0.4) |> mutate(site = "Valles Caldera")
-spp_m <- tidy_envfit(envssm) |> filter(p < 0.05 & r2 > 0.4) |> mutate(site = "Manitou EF")
+spp_m <- tidy_envfit(envssm) |> filter(p < 0.05 & r2 > 0.4) |> mutate(site = "Manitou")
 sppp <- bind_rows(spp_v, spp_m) |>
   dplyr::rename(species = var) |>
   mutate(species = str_replace_all(species, "_", " ") |>
@@ -394,9 +425,9 @@ sppp <- bind_rows(spp_v, spp_m) |>
 ptspp <- sitesv |>
   mutate(site = "Valles Caldera",
          `Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 14, "CAD Recipient", "CAD Donor")) |>
-  bind_rows(sites |> mutate(site = "Manitou EF") |>
+  bind_rows(sites |> mutate(site = "Manitou") |>
               mutate(`Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 15, "CAD Recipient", "CAD Donor"))) |>
-  mutate(StudyArea = ifelse(str_sub(plot, 1,1) == 'm', "Manitou EF", "Valles Caldera")) |>
+  mutate(StudyArea = ifelse(str_sub(plot, 1,1) == 'm', "Manitou", "Valles Caldera")) |>
   ggplot() +
   geom_point(aes(x=MDS1, y=MDS2, color = `Diurnal\nTemperature\nRrange`, shape = StudyArea), size=3) +
   geom_segment(data = sppp, x=0,y=0, color = "grey",arrow = arrow(),
@@ -420,7 +451,7 @@ ggsave(plot = ptspp, filename = 'out/nmds_spp.png', width = 9, height =4.65, bg 
 ptbb <- sitesv |>
   mutate(site = "Valles Caldera",
          `Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 14, "CAD Recipient", "CAD Donor")) |>
-  bind_rows(sites |> mutate(site = "Manitou EF") |>
+  bind_rows(sites |> mutate(site = "Manitou") |>
               mutate(`Diurnal\nTemperature\nRrange` = ifelse(tdelta >= 15, "CAD Recipient", "CAD Donor"))) |>
   bind_rows(sitesb |>
     mutate( site = 'Both',
@@ -428,16 +459,20 @@ ptbb <- sitesv |>
                                                       tdelta < 14 & str_sub(plot, 1,1) == "m"~"CAD Donor",
                                                       tdelta >= 15 & str_sub(plot, 1,1) != "m"~"CAD Recipient",
                                                       tdelta < 15 & str_sub(plot, 1,1) != "m"~"CAD Donor")))|>
-  mutate(StudyArea = ifelse(str_sub(plot, 1,1) == 'm', "Manitou EF", "Valles Caldera")) |>
+  mutate(StudyArea = ifelse(str_sub(plot, 1,1) == 'm', "Manitou", "Valles Caldera")) |>
   ggplot() +
-  geom_point(aes(x=MDS1, y=MDS2, color = `Diurnal\nTemperature\nRrange`, shape = StudyArea), size=3) +
+  geom_point(aes(x=MDS1, y=MDS2,
+                 color = `Diurnal\nTemperature\nRrange`,
+                 shape = StudyArea),
+             size=3, stroke = 1) +
   geom_segment(data = env_bbb,x=0,y=0, color = "grey",arrow = arrow(),
                aes(yend = NMDS2, xend = NMDS1), lwd=1)+
-  geom_text_repel(data = env_bbb,size=4, aes(label = species, x=NMDS1, y=NMDS2), color = "black") +
+  geom_text(data = env_labels,size=4, aes(label = species, x=NMDS1, y=NMDS2), color = "black") +
   # scale_color_viridis_c() +
   facet_wrap(~site) +
   coord_equal() +
   scale_color_manual(values =rep(wesanderson::wes_palette("Royal1",2),2))+
+  scale_shape_manual(values = c(1,2)) +
   theme_clean() +
   theme(panel.background = element_rect(color='black'),
         panel.grid.major.y = element_blank(),
@@ -449,100 +484,6 @@ ptbb <- sitesv |>
 ggsave(filename = 'out/nmds_3pan.png', width = 10, height=5, bg='white')
 
 
-# diversity analysis =========
-# diversity analysis
-# libs =============================
-library(tidyverse)
-library(topomicro)
-library(broom)
-library(car)
-
-# data prep =========================
-locations <- read_csv("data/sensor_locations.csv") |>
-  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) |>
-  dplyr::select(-starts_with("alpha"))
-
-val_topo <- read_csv('data/val_topo.csv')
-mef_topo <- read_csv('data/mef_topo.csv')
-
-mef_clim <- read_csv("data/cleaned_bm/mef_jul23.csv") |>
-  bind_rows(read_csv("data/cleaned_bm/mef_febmay24.csv")); glimpse(mef_clim)
-
-vall_clim <- read_csv("data/cleaned_bm/vall_cleaned_all.csv"); glimpse(vall_clim)
-
-# standardisation data frames
-
-load("data/mef_station_data.rda")
-
-val_std <- read_csv("data/vall_stations_cleaned.csv") |>
-  dplyr::select(humidity_pct = rh_pct, temperature_c = temp_c, dt, ymd = date_mmddyyyy, site) |>
-  dplyr::mutate(vpd_kPa = topomicro::get_vpd(temp_c = temperature_c, rh = humidity_pct)) |>
-  dplyr::filter(site == "ValleGrande")
-
-# hours between 24-32C - calculate that
-mef_plotwise_summaries <-
-  mef_clim |>
-  plotwise_summary_std(stdf = mef_station_data)
-
-vall_plotwise_summaries <-
-  vall_clim |>
-  plotwise_summary_std(stdf = val_std)
-
-# ggplot(vall_plotwise_summaries, aes(x=tdelta, y=stdelta, label = rownames(vall_plotwise_summaries))) + geom_text()
-
-# both_plotwise <- bind_rows(mef_plotwise_summaries, vall_plotwise_summaries)
-
-vall_veg <- readr::read_csv("data/valles_caldera/microclimate - VALL_veg.csv") |>
-  dplyr::select(plot, species) |>
-  dplyr::mutate(occurrence = 1,
-                plot = str_to_lower(plot) %>% str_remove_all("_"),
-                species = str_replace_all(species, " ", "_")|>
-                  str_replace_all("-", "_")) |>
-  tidyr::pivot_wider(names_from = species, values_from = occurrence,
-                     values_fn = first, values_fill = 0) |>
-  mutate(plot = ifelse(str_sub(plot, 3,3) == "0", str_remove_all(plot, "0"), plot)) |>
-  filter(plot %in% rownames(vall_plotwise_summaries)) |>
-  arrange(plot) %>%
-  tibble::column_to_rownames("plot");vall_veg
-
-mef_veg <- readr::read_csv("data/mef/microclimate - MEF_veg.csv")|>
-  dplyr::select(plot, actual_species) |>
-  dplyr::mutate(occurrence = 1,
-                plot = str_to_lower(plot) %>% str_remove_all("_"),
-                actual_species = str_replace_all(actual_species, " ", "_")|>
-                  str_replace_all("-", "_")) |>
-  tidyr::pivot_wider(names_from = actual_species, values_from = occurrence,
-                     values_fn = first, values_fill = 0) |>
-  filter(plot %in% rownames(mef_plotwise_summaries)) |>
-  arrange(plot) |>
-  tibble::column_to_rownames("plot");mef_veg
-
-## topoterra ==== from THoecker
-
-terra::rast("data/big/topoterra_2C_2015.tif") -> xx
-
-locations_xx <- locations |>
-  st_transform(crs = st_crs(xx)) %>%
-  mutate(terra::extract(xx, .),
-         id = str_replace_all(id, 'vg0', 'vg'))
-
-tc_mef <- locations_xx |>
-  st_set_geometry(NULL) |>
-  dplyr::select(-ID, tc_aet = aet, tc_def = def, tc_tmx= tmax, tc_tmin = tmin) |>
-  filter(str_sub(id, 1,3) == "mef") |>
-  filter(id %in% rownames(mef_plotwise_summaries)) |>
-  left_join(mef_topo) |>
-  dplyr::rename(plot=id)
-
-tc_val <- locations_xx |>
-  st_set_geometry(NULL) |>
-  dplyr::select(-ID, tc_aet = aet, tc_def = def, tc_tmx= tmax, tc_tmin = tmin) |>
-  filter(str_sub(id, 1,2) %in% c("vg", 'rs')) |>
-  mutate(id = str_replace_all(id, "g0", "g")) |>
-  filter(id %in% rownames(vall_plotwise_summaries)) |>
-  left_join(val_topo) |>
-  dplyr::rename(plot=id)
-
 # biodiversity by tdelta ====
 nsp <- vall_veg |> vegan::specnumber() |> as.data.frame() |> tibble::rownames_to_column("plot") |> dplyr::rename(nspp=2)
 nspm <- mef_veg |> vegan::specnumber() |> as.data.frame() |> tibble::rownames_to_column("plot") |> dplyr::rename(nspp=2)
@@ -551,18 +492,16 @@ nspm <- mef_veg |> vegan::specnumber() |> as.data.frame() |> tibble::rownames_to
 vall_div <- vall_plotwise_summaries |>
   tibble::rownames_to_column("plot") |>
   left_join(nsp) |>
-  left_join(tc_val) |>
   mutate(site = "val") |>
   mutate(dtr_threshold = ifelse(tdelta > 14, "CAD Recipient", "CAD Donor"))
 mef_div <- mef_plotwise_summaries |>
   tibble::rownames_to_column("plot") |>
   left_join(nspm)|>
-  left_join(tc_mef)  |>
   mutate(site = "mef")|>
   mutate(dtr_threshold = ifelse(tdelta > 15, "CAD Recipient", "CAD Donor"))
 
 
-both_div <- bind_rows(mef_div ,
+both_div <- bind_rows(mef_div,
                       vall_div)
 
 table(both_div$dtr_threshold); table(both_div$sdtr_threshold)
@@ -581,7 +520,7 @@ wesanderson::wes_palette("Royal1", 2) |> as.vector() -> cols
 pd <- ggeffects::ggpredict(m, terms = c('dtr_threshold', 'site'), back_transform = T) |>
   as.data.frame() |>
   dplyr::rename(site = group) |>
-  dplyr::mutate(site = ifelse(site == 'mef', "Manitou EF", "Valles Caldera")) |>
+  dplyr::mutate(site = ifelse(site == 'mef', "Manitou", "Valles Caldera")) |>
   ggplot() +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, color = x), width=0.1) +
   geom_point(aes(x=x, y=predicted, color = x)) +
@@ -603,60 +542,25 @@ brms::hypothesis(m, 'dtr_thresholdCADRecipient < 0', robust = TRUE)
 
 # dtr vs tmin vs vpdmin =======================
 
-pvpddtr<- both_plotwise |>
+pvpddtr <- both_plotwise |>
   tibble::rownames_to_column('id') |>
-  mutate(basin = ifelse(str_sub(id,1,1) == 'm', "Manitou EF", "Valles Caldera NP")) |>
+  mutate(basin = ifelse(str_sub(id,1,1) == 'm', "Manitou", "Valles\nCaldera")) |>
   filter(id != 'mef16') |>
   pivot_longer(cols = c(vmin, tmin)) |>
   mutate(name = ifelse(name == "vmin", "Minimum VPD", "Minimum Temperature")) |>
   ggplot(aes(tdelta, value, color = basin)) +
-  geom_point() +
-  geom_smooth(se=F, method = 'lm') +
+  geom_point(aes(shape = basin), size=3, stroke = 1) +
+  geom_smooth(se=F, method = 'lm', show.legend = F) +
   facet_wrap(~name, scales = 'free') +
-  scale_color_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(1,2)) +
   theme_clean() +
   xlab("Diurnal Temperature Range") +
   theme(legend.title = element_blank(),
         legend.position = c(1,1),
+        legend.background = element_rect(fill=NA),
         axis.title.y = element_blank(),
         legend.justification = c(1,1))
-
-# threshold sensitivity analysis =================
-result <- data.frame(thresh = NA, r2 = NA, site = NA)
-for(i in 1:length(seq(13,16,.1))){
-  env <- mef_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(13,16,.1)[i], 'over', 'under'))
-  x <- adonis2(mef_veg ~ thresh, data = env, permutations = 9999)
-  result[i, 1] <- seq(13,16,.1)[i]
-  result[i,2] <-  x$R2[1]
-  result[i,3] <- 'mef'
-}
-
-resultv <- data.frame(thresh = NA, r2 = NA, site = NA)
-for(i in 1:length(seq(10,16,.1))){
-  env <- vall_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(10,16,.1)[i], 'over', 'under'))
-  x <- adonis2(vall_veg ~ thresh, data = env, permutations = 9999)
-  resultv[i, 1] <- seq(10,16,.1)[i]
-  resultv[i,2] <- x$R2[1]
-  resultv[i,3] <- 'val'
-}
-ggplot(bind_rows(result, resultv)) +
-  geom_line(aes(x=thresh, y=r2, color = site))
-
-# species list, how many species are common to both places?
-
-sp_list <- both_veg |>
-  tibble::rownames_to_column('site') |>
-  dplyr::mutate(site = ifelse(str_sub(site, 1,1)=='m', "Manitou", "Valles")) |>
-  pivot_longer(-site) |>
-  group_by(site, name) |>
-  summarise(value = sum(value)) |>
-  pivot_wider(names_from = site)
-
-sp_list |>
-  mutate(is_both = ifelse(Manitou * Valles > 0, 1,0)) |>
-  pull(is_both) |>
-  sum()
-
 
 # all together
 
@@ -665,14 +569,92 @@ pmultipanel <- ggarrange(ptbb,
                          nrow=2, labels='auto', heights = c(1.3,1)); pmultipanel
 ggsave(pmultipanel, filename = 'out/fig3multi.png', bg='white', width = 10, height =7.45)
 
+# supplementary analysis suggested by paula ====================================
 
-# species list
+preds <- names(both_div)[2:9]
 
-vv<- vall_veg |> colnames() |> str_remove_all("cf") |> sort() |>
-  str_replace_all("_", " ") |> trimws() |> as_tibble() |> dplyr::rename(Valles = value)
-mv <- mef_veg |> colnames() |> str_remove_all("cf") |> sort() |>
-  str_replace_all("_", " ") |> str_replace_all("uva ursi", "uva-ursi")|>
-  trimws() |> as_tibble() |> dplyr::rename(Manitou = value)
+result <- list()
+cc <- 1
+for(p in preds){
+  ff <- formula(paste("nspp ~", p, "* site"))
+  result[[cc]] <- glm(ff, data = both_div, family = "poisson")
+  cc <- cc+1
+}
 
-write_csv(vv, 'out/vc_sp_list.csv')
-write_csv(mv, 'out/mf_sp_list.csv')
+lapply(result, performance::r2) |>
+  bind_rows() |>
+  mutate(pred = preds)
+
+lapply(result, broom::tidy) |>
+  bind_rows()
+library(ggeffects)
+lapply(result, function(x)ggpredict(x)[[1]] |> as.data.frame()) |>
+  bind_rows() |>
+  mutate(var = str_sub(group, 1,1),
+         var1= str_sub(group, 2, nchar(group)),
+         var = ifelse(var == "t", "Temperature", "VPD")) |>
+  group_by(group)|>
+  mutate(sx = scale(x)) |>
+  ungroup() |>
+  ggplot(aes(x=sx, y=predicted, color = var)) +
+  geom_line(lwd=1) +
+  facet_wrap(~var1, scales = 'free_x', nrow = 2) +
+  geom_hline(yintercept =c(14.85, 18.75), lty=3, lwd=1) +
+  scale_color_manual(values =c('cyan4', 'chocolate')) +
+  theme_bw() +
+  theme(legend.title = element_blank(),
+        legend.position = c(1,1),
+        legend.background = element_rect(fill=NA, color = 'black'),
+        legend.justification = c(1,1))
+
+summary(m); performance::check_model(m); fixef(m)
+
+
+
+# # species list =========
+#
+# vv<- vall_veg |> colnames() |> str_remove_all("cf") |> sort() |>
+#   str_replace_all("_", " ") |> trimws() |> as_tibble() |> dplyr::rename(Valles = value)
+# mv <- mef_veg |> colnames() |> str_remove_all("cf") |> sort() |>
+#   str_replace_all("_", " ") |> str_replace_all("uva ursi", "uva-ursi")|>
+#   trimws() |> as_tibble() |> dplyr::rename(Manitou = value)
+#
+# write_csv(vv, 'out/vc_sp_list.csv')
+# write_csv(mv, 'out/mf_sp_list.csv')
+#
+# # threshold sensitivity analysis =================
+# result <- data.frame(thresh = NA, r2 = NA, site = NA)
+# for(i in 1:length(seq(13,16,.1))){
+#   env <- mef_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(13,16,.1)[i], 'over', 'under'))
+#   x <- adonis2(mef_veg ~ thresh, data = env, permutations = 9999)
+#   result[i, 1] <- seq(13,16,.1)[i]
+#   result[i,2] <-  x$R2[1]
+#   result[i,3] <- 'mef'
+# }
+#
+# resultv <- data.frame(thresh = NA, r2 = NA, site = NA)
+# for(i in 1:length(seq(10,16,.1))){
+#   env <- vall_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(10,16,.1)[i], 'over', 'under'))
+#   x <- adonis2(vall_veg ~ thresh, data = env, permutations = 9999)
+#   resultv[i, 1] <- seq(10,16,.1)[i]
+#   resultv[i,2] <- x$R2[1]
+#   resultv[i,3] <- 'val'
+# }
+# ggplot(bind_rows(result, resultv)) +
+#   geom_line(aes(x=thresh, y=r2, color = site))
+#
+# # species list, how many species are common to both places?
+#
+# sp_list <- both_veg |>
+#   tibble::rownames_to_column('site') |>
+#   dplyr::mutate(site = ifelse(str_sub(site, 1,1)=='m', "Manitou", "Valles")) |>
+#   pivot_longer(-site) |>
+#   group_by(site, name) |>
+#   summarise(value = sum(value)) |>
+#   pivot_wider(names_from = site)
+#
+# sp_list |>
+#   mutate(is_both = ifelse(Manitou * Valles > 0, 1,0)) |>
+#   pull(is_both) |>
+#   sum()
+#
