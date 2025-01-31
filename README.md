@@ -13,7 +13,7 @@
 
 ## Diurnal temperature range is stable
 
-![](out/figure2_dtr_vs.png)
+![](out/figure2_dtr_vc.png)
 
 ## DTR Drives fine-scale community composition and has a negative relationship with species richness
 
