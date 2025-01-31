@@ -6,4 +6,15 @@
 
 # Data and code for "Diurnal temperature range drives understory plant community composition in micro-climatically complex temperate forests"
 
+## Study area
+
 ![](out/map_w_inset.png)
+
+
+## Diurnal temperature range is stable
+
+![](out/figure2_dtr_vs.png)
+
+## DTR Drives fine-scale community composition and has a negative relationship with species richness
+
+![](out/nmds_3pan.png)
