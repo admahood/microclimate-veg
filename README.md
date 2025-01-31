@@ -5,4 +5,5 @@
 
 
 # Data and code for "Diurnal temperature range drives understory plant community composition in micro-climatically complex temperate forests"
-looking at microclimate's effect on vegetation
+
+![](out/map_w_inset.png)
