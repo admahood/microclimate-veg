@@ -17,4 +17,8 @@
 
 ## DTR Drives fine-scale community composition and has a negative relationship with species richness
 
-![](out/nmds_3pan.png)
+![](out/fig3multi.png)
+
+## DTR can be modelled with elevation and topographic wetness index
+
+![](out/fig4_multipanel.png)
