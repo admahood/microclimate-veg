@@ -569,7 +569,7 @@ pmultipanel <- ggarrange(ptbb,
                          nrow=2, labels='auto', heights = c(1.3,1)); pmultipanel
 ggsave(pmultipanel, filename = 'out/fig3multi.png', bg='white', width = 10, height =7.45)
 
-# supplementary analysis suggested by paula ====================================
+# supplementary analysis suggested by paula
 
 preds <- names(both_div)[2:9]
 
@@ -600,6 +600,7 @@ lapply(result, function(x)ggpredict(x)[[1]] |> as.data.frame()) |>
   geom_line(lwd=1) +
   facet_wrap(~var1, scales = 'free_x', nrow = 2) +
   geom_hline(yintercept =c(14.85, 18.75), lty=3, lwd=1) +
+  ylab("species richness") +
   scale_color_manual(values =c('cyan4', 'chocolate')) +
   theme_bw() +
   theme(legend.title = element_blank(),
