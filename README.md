@@ -4,7 +4,7 @@
 
 
 
-# Data and code for "Diurnal temperature range drives understory plant community composition in micro-climatically complex temperate forests"
+# Data and code for "Diurnal temperature range drives understory plant community composition in micro-climatically complex temperate montane forests"
 
 ## Study area
 
