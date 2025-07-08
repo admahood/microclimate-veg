@@ -12,6 +12,13 @@ library(ggspatial)
 # make a 4 panel map: 1. TWI, 2. DEM/hillshade, 3. Worldclim DTR, 4. Modelled DTR
 # make sure we're using USGS 3dep 10meter DEM, correct TWI
 
+unbroken <- c('mef1', 'mef10', 'mef11', 'mef12', 'mef14', 'mef16', 'mef17',
+              'mef18', 'mef19', 'mef2', 'mef20', 'mef21', 'mef22', 'mef23',
+              'mef24', 'mef25', 'mef27', 'mef3', 'mef4', 'mef5', 'mef6', 'mef7',
+              'mef8', 'mef9', 'rs1', 'rs2', 'rs3', 'rs4', 'rs5', 'vg1', 'vg10',
+              'vg11', 'vg12', 'vg13', 'vg14', 'vg15', 'vg16', 'vg2', 'vg3', 'vg4',
+              'vg5', 'vg6', 'vg7', 'vg8', 'vg9')
+
 prism <- terra::rast("data/prism/PRISM_tmin_30yr_normal_800mM5_annual_bil.bil")
 
 dems <- terra::rast('data/mef_dem.tif') |>
@@ -28,21 +35,23 @@ mef_station <- data.frame(name = c("Wx", "Mt. Deception", "Hotel Gulch"),
                           x=-c(105.09422836459245, 105.05999, 105.05999))|>
   st_as_sf(coords = c(x='x',y='y'), crs = 4326)
 
-locations <- read_csv("data/sensor_locations.csv")
+locations <- read_csv("data/sensor_locations.csv") |>
+  mutate(id = str_replace_all(id, 'vg0', 'vg'))
 
 locations_sf <- locations |>
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326) |>
   dplyr::select(-starts_with("alpha")) |>
-  filter(str_sub(id, 1,2) %in% c('vg', 'me', 'rs'))
+  filter(str_sub(id, 1,2) %in% c('vg', 'me', 'rs'),
+         id %in% unbroken)
 
 locations_val <- locations_sf |>
   filter(str_sub(id, 1,2) %in% c('vg', 'rs')) |>
   st_transform(crs = st_crs(dems[[2]]))
 
-wc <- terra::rast('data/big/wc2.1_30s_bio/wc2.1_30s_bio_2.tif') |>
+wc <- prism |> #terra::rast('data/big/wc2.1_30s_bio/wc2.1_30s_bio_2.tif') |>
   terra::crop(terra::ext(locations_sf |> st_buffer(dist = 100000)))
-plot(wc); plot(locations_sf, add=T, col='black')
-plot(dems[[1]])
+# plot(wc); plot(locations_sf, add=T, col='black')
+# plot(dems[[1]])
 
 mef_df <- dems[[1]] |> as.data.frame(xy=TRUE)
 

@@ -32,7 +32,7 @@ load("data/mef_station_data.rda")
 
 val_std <- read_csv("data/vall_stations_cleaned.csv") |>
   dplyr::select(humidity_pct = rh_pct, temperature_c = temp_c, dt, ymd = date_mmddyyyy, site) |>
-  dplyr::mutate(vpd_kPa = topomicro::get_vpd(temp_c = temperature_c, rh = humidity_pct)) |>
+  dplyr::mutate(vpd_kPa = topomicro::vpd(temp_c = temperature_c, rh = humidity_pct)) |>
   dplyr::filter(site == "ValleGrande")
 
 # hours between 24-32C - calculate that
@@ -507,6 +507,30 @@ both_div <- bind_rows(mef_div,
 table(both_div$dtr_threshold); table(both_div$sdtr_threshold)
 options(na.action = "na.fail")
 
+# total exploratory thing from R3 ---
+xxx <- dmsf |> bind_rows(dvsf) |> dplyr::rename(plot = id) |> st_set_geometry(NULL) |>
+  dplyr::select(plot, slope, aspect, elevation, twi, hli, rel_elv)
+
+ddddd <- left_join(both_div, xxx)
+library(lmerTest)
+library(piecewiseSEM)
+
+m1 <- glm(nspp ~ (dtr_threshold + twi + elevation)*site, data = ddddd, family = 'poisson')
+m2 <- glm(as.factor(dtr_threshold) ~ elevation + twi, data = ddddd, family = 'binomial')
+
+m1 <- glm(nspp ~ tdelta + twi, data = ddddd, family = 'poisson')
+m2 <- glm(tdelta ~ elevation + twi, data = ddddd)
+
+psm <- psem(m1, m2)
+summary(m1); performance::r2(m1)
+summary(m2);performance::r2(m2)
+summary(psm)
+
+x <- summary(psm)
+x$coefficients |>
+  as.data.frame() |>
+  write_csv('out/sem_table.csv')
+
 library(brms)
 
 m <- brm(nspp~dtr_threshold*site, data = both_div, family = "poisson")
@@ -623,26 +647,26 @@ summary(m); performance::check_model(m); fixef(m)
 # write_csv(vv, 'out/vc_sp_list.csv')
 # write_csv(mv, 'out/mf_sp_list.csv')
 #
-# # threshold sensitivity analysis =================
-# result <- data.frame(thresh = NA, r2 = NA, site = NA)
-# for(i in 1:length(seq(13,16,.1))){
-#   env <- mef_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(13,16,.1)[i], 'over', 'under'))
-#   x <- adonis2(mef_veg ~ thresh, data = env, permutations = 9999)
-#   result[i, 1] <- seq(13,16,.1)[i]
-#   result[i,2] <-  x$R2[1]
-#   result[i,3] <- 'mef'
-# }
-#
-# resultv <- data.frame(thresh = NA, r2 = NA, site = NA)
-# for(i in 1:length(seq(10,16,.1))){
-#   env <- vall_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(10,16,.1)[i], 'over', 'under'))
-#   x <- adonis2(vall_veg ~ thresh, data = env, permutations = 9999)
-#   resultv[i, 1] <- seq(10,16,.1)[i]
-#   resultv[i,2] <- x$R2[1]
-#   resultv[i,3] <- 'val'
-# }
-# ggplot(bind_rows(result, resultv)) +
-#   geom_line(aes(x=thresh, y=r2, color = site))
+# threshold sensitivity analysis =================
+result <- data.frame(thresh = NA, r2 = NA, site = NA)
+for(i in 1:length(seq(13,16,.1))){
+  env <- mef_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(13,16,.1)[i], 'over', 'under'))
+  x <- adonis2(mef_veg ~ thresh, data = env, permutations = 9999)
+  result[i, 1] <- seq(13,16,.1)[i]
+  result[i,2] <-  x$R2[1]
+  result[i,3] <- 'mef'
+}
+
+resultv <- data.frame(thresh = NA, r2 = NA, site = NA)
+for(i in 1:length(seq(10,16,.1))){
+  env <- vall_plotwise_summaries |> mutate(thresh = ifelse(tdelta > seq(10,16,.1)[i], 'over', 'under'))
+  x <- adonis2(vall_veg ~ thresh, data = env, permutations = 9999)
+  resultv[i, 1] <- seq(10,16,.1)[i]
+  resultv[i,2] <- x$R2[1]
+  resultv[i,3] <- 'val'
+}
+ggplot(bind_rows(result, resultv)) +
+  geom_line(aes(x=thresh, y=r2, color = site))
 #
 # # species list, how many species are common to both places?
 #

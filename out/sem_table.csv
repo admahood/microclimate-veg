@@ -1,0 +1,6 @@
+Response,Predictor,Estimate,Std.Error,DF,Crit.Value,P.Value,Std.Estimate,
+nspp,tdelta,-0.041,0.0146,41,-2.8094,0.005,-0.3892,**
+nspp,twi,0.0275,0.012,41,2.2866,0.0222,0.2356,*
+nspp,rel_elv,-0,3e-4,41,-0.1516,0.8795,-0.0197,
+tdelta,elevation,-0.0122,0.0016,42,-7.7592,0,-0.7016,***
+tdelta,twi,0.3772,0.1002,42,3.7637,5e-4,0.3403,***

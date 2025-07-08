@@ -16,11 +16,11 @@ val_dem <- terra::rast('data/vc_dem.tif')
 val_topo <- read_csv('data/val_topo.csv')
 mef_topo <- read_csv('data/mef_topo.csv')
 
-wc_dtr <- terra::rast('data/big/wc2.1_30s_bio/wc2.1_30s_bio_2.tif')
+# wc_dtr <- terra::rast('data/big/wc2.1_30s_bio/wc2.1_30s_bio_2.tif')
 
-locations <- locations %>%
-  mutate(terra::extract(wc_dtr, ., ID =F)) |>
-  dplyr::rename(wc_dtr = wc2.1_30s_bio_2)
+# locations <- locations %>%
+#   mutate(terra::extract(wc_dtr, ., ID =F)) |>
+#   dplyr::rename(wc_dtr = wc2.1_30s_bio_2)
 
 dm <- mef_plotwise_summaries |>
   tibble::rownames_to_column('id') |>
@@ -47,18 +47,18 @@ dvsf <- locations |>
 mm <- lm(tdelta ~ twi + elevation, data = dmsf)
 performance::check_model(mm); summary(mm)
 
-vm <- lm(tdelta ~ twi + elevation+wc_dtr, data = dvsf)
-performance::check_model(vm); summary(vm)
+# vm <- lm(tdelta ~ twi + elevation+wc_dtr, data = dvsf)
+# performance::check_model(vm); summary(vm)
 
 
 # site is not significant, model better without it, same with wc_dtr
-vmm <- lm(tdelta ~ twi + elevation + wc_dtr, data = dvsf |> bind_rows(dmsf) |>
-            mutate(site = ifelse(str_sub(id,1,1) == "m", "mef", 'val')))
-performance::check_model(vmm); summary(vmm)
+# vmm <- lm(tdelta ~ twi + elevation + wc_dtr, data = dvsf |> bind_rows(dmsf) |>
+#             mutate(site = ifelse(str_sub(id,1,1) == "m", "mef", 'val')))
+# performance::check_model(vmm); summary(vmm)
 vmm1 <- lm(tdelta ~ twi + elevation, data = dvsf |> bind_rows(dmsf) |>
             mutate(site = ifelse(str_sub(id,1,1) == "m", "mef", 'val')))
 performance::check_model(vmm1); summary(vmm1)
-AIC(vmm, vmm1)
+# AIC(vmm, vmm1)
 
 tidy_sp <- function(sf_df, vars, y){
   x = st_coordinates(sf_df)[,c(1,2)]
@@ -101,6 +101,38 @@ predict_sp(c(val_twi, val_dem), bsp) |> plot()
 dtr_spmod <- bsp; save(dtr_spmod, file = 'out/dtr_spmod.rda')
 preds <- predict_sp(c(val_twi, val_dem), bsp)
 
+
+# leave one out cross validation -- takes a while
+yes_lets_redo_loocv <- FALSE
+if(yes_lets_redo_loocv){ddd <- bind_rows(dmsf, dvsf)
+  loo_preds <- list()
+  for(i in 1:nrow(ddd)){
+    dsub <- ddd[-i,]
+    mod <- tidy_sp(dsub, vars = c("twi", 'elevation'), y = 'tdelta')
+
+    if(str_sub(ddd[i,]$id, 1,3) == "mef"){
+      preds <-  predict_sp(c(mef_twi, mef_dem), mod)
+      }else{preds <- predict_sp(c(val_twi, val_dem), mod)}
+
+    loo_preds[[i]] <- ddd[i,] |> dplyr::select(tdelta, id)|>
+      mutate(terra::extract(preds, ddd[i,] , ID = F))
+    print(i)
+  }
+
+  bind_rows(loo_preds) |> st_write("data/loo_preds.gpkg")
+
+}else{load('data/loo_preds.gpkg')}
+
+bind_rows(loo_preds) |> lm(tdelta ~ prediction, data = _) |> summary()
+
+bind_rows(loo_preds) |>
+  mutate(SE =(tdelta-prediction)^2) |>
+  pull(SE) |>
+  mean() |>
+  sqrt()
+
+# plotting
+
 pv <- preds |> as.data.frame(xy=TRUE) |>
   ggplot() +
   geom_raster(aes(x=x,y=y, fill = prediction)) +
@@ -133,17 +165,21 @@ pm <- mpreds |>
         axis.title = element_blank(),
         legend.background = element_rect(color = "black", fill="white"));pm
 
-ggarrange(pv, pm, nrow =2, ncol=1, heights = c(1.3,1)) |>
-  ggsave(filename = "out/twi_predictions.png", bg='white',
-         width =5, height =7)
+# ggarrange(pv, pm, nrow =2, ncol=1, heights = c(1.3,1)) |>
+#   ggsave(filename = "out/twi_predictions.png", bg='white',
+#          width =5, height =7)
 
 
-pr2 <- dmsf %>%
-  mutate(terra::extract(mpreds,.),
-         site = "Manitou") |>
-  bind_rows(dvsf %>%
-              mutate(terra::extract(preds,.),
-                     site = "Valles\nCaldera") ) |>
+
+# pr2 <- dmsf %>%
+#   mutate(terra::extract(mpreds,.),
+#          site = "Manitou") |>
+#   bind_rows(dvsf %>%
+#               mutate(terra::extract(preds,.),
+#                      site = "Valles\nCaldera") )
+
+pr2 <- loo_preds |> bind_rows() %>% mutate(y = st_coordinates(.)[,2],
+                                    site = ifelse(y>38, "Manitou", "Valles\nCaldera")) |>
   ggplot(aes(x=prediction, y=tdelta)) +
   geom_point(aes(color = site, shape = site), size=3, stroke = 1) +
   # geom_smooth(method = 'lm') +
@@ -152,7 +188,7 @@ pr2 <- dmsf %>%
   scale_shape_manual(values = c(1,2))+
   xlab("Predicted DTR") +
   ylab("Observed DTR") +
-  ggtitle("c. Model Fit") +
+  ggtitle("c. Leave One Out Cross-Validation") +
   theme_clean() +
   theme(#legend.position = 'bottom', #c(0,1),
         #legend.justification = c(0,1),
