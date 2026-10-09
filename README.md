@@ -15,7 +15,7 @@
 
 ![](out/figure2_dtr_vc.png)
 
-## DTR Drives fine-scale community composition and has a negative relationship with species richness
+## DTR is associated with fine-scale community composition and has a negative relationship with species richness
 
 ![](out/fig3multi.png)
 
